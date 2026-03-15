@@ -74,6 +74,7 @@ const cleaned = data.elements.map(el => {
     brand: brand,
     color: color,
     voivodeship: getVoivodeship(el.lat, el.lon),
+    opening_hours: el.tags?.opening_hours || null,
   };
 });
 
