@@ -5,12 +5,11 @@ import 'leaflet/dist/leaflet.css';
 import './App.css';
 import StatsPage from './Stats';
 
-interface Station {
+export interface Station {
   id: number;
   lat: number;
   lon: number;
   brand?: string;
-  name?: string | null;
   operator?: string | null;
   color: string;
   voivodeship: string;
@@ -26,36 +25,73 @@ interface Station {
   payment_cards: boolean;
 }
 
-function MapPage({ stations, brands, loading }: { stations: Station[]; brands: { [key: string]: string }; loading: boolean }) {
-  return (
-    <div className="h-full flex">
-      <aside className="w-72 min-w-[240px] p-4 bg-gray-100 border-r overflow-y-auto text-sm">
-        <h2 className="text-lg font-bold mb-3">Legend</h2>
-        <div className="mb-3">
-          <h3 className="font-semibold mb-1">Major Brands</h3>
-          <ul className="space-y-1">
-            {Object.keys(brands).map(brand => (
-              <li key={brand} className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full flex-shrink-0" style={{ backgroundColor: brands[brand] }} />
-                {brand}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <h3 className="font-semibold mb-1">Independent / small chains</h3>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full flex-shrink-0 bg-gray-400" />
-            &le;5 stations
-          </div>
-        </div>
-        <p className="mt-4 text-xs text-gray-500">Click a dot to see station details.</p>
-      </aside>
+export type Brands = { [brand: string]: string };
 
-      <div className="flex-1 relative">
+// Shared legend — used identically on both pages
+export function BrandLegend({ brands, note }: { brands: Brands; note?: string }) {
+  return (
+    <aside style={{
+      width: 190,
+      flexShrink: 0,
+      overflowY: 'auto',
+      background: '#f3f4f6',
+      borderRight: '1px solid #d1d5db',
+      padding: '14px 12px',
+    }}>
+      <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#6b7280', marginBottom: 10 }}>
+        Legend
+      </p>
+
+      <p style={{ fontSize: 10, fontWeight: 600, color: '#374151', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        Major chains
+      </p>
+      <ul style={{ listStyle: 'none', margin: 0, padding: 0, marginBottom: 12 }}>
+        {Object.entries(brands).map(([brand, color]) => (
+          <li key={brand} style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 5, fontSize: 12, color: '#1f2937' }}>
+            <span style={{
+              display: 'block',
+              width: 11,
+              height: 11,
+              borderRadius: '50%',
+              background: color,
+              border: '1.5px solid rgba(0,0,0,0.25)',
+              flexShrink: 0,
+            }} />
+            {brand}
+          </li>
+        ))}
+      </ul>
+
+      <p style={{ fontSize: 10, fontWeight: 600, color: '#374151', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        Other
+      </p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: '#1f2937' }}>
+        <span style={{
+          display: 'block',
+          width: 11,
+          height: 11,
+          borderRadius: '50%',
+          background: '#9ca3af',
+          border: '1.5px solid rgba(0,0,0,0.25)',
+          flexShrink: 0,
+        }} />
+        Independent / small chains
+      </div>
+
+      {note && <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 12 }}>{note}</p>}
+    </aside>
+  );
+}
+
+function MapPage({ stations, brands, loading }: { stations: Station[]; brands: Brands; loading: boolean }) {
+  return (
+    <div style={{ height: '100%', display: 'flex' }}>
+      <BrandLegend brands={brands} note="Click a dot to see details." />
+
+      <div style={{ flex: 1, position: 'relative' }}>
         {loading && (
-          <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
-            <div className="text-xl">Loading gas stations...</div>
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+            Loading stations…
           </div>
         )}
         <MapContainer center={[52.0, 19.5]} zoom={6} style={{ height: '100%', width: '100%' }}>
@@ -71,25 +107,23 @@ function MapPage({ stations, brands, loading }: { stations: Station[]; brands: {
               fillColor={station.color}
               color={station.color}
               fillOpacity={0.8}
+              weight={1}
             >
               <Popup>
-                <div className="space-y-1 text-sm" style={{ minWidth: 160 }}>
-                  <div className="font-semibold">{station.name || station.brand || 'Unknown'}</div>
-                  {station.brand && station.name && (
-                    <div className="text-gray-500">{station.brand}</div>
-                  )}
+                <div style={{ minWidth: 160, fontSize: 13 }}>
+                  <div style={{ fontWeight: 600, marginBottom: 4 }}>{station.brand || 'Unknown'}</div>
                   {station.opening_hours && (
-                    <div><span className="font-medium">Hours:</span> {station.opening_hours}</div>
+                    <div style={{ marginBottom: 4 }}><b>Hours:</b> {station.opening_hours}</div>
                   )}
-                  <div className="pt-1 flex flex-wrap gap-1">
-                    {station.lpg && <span className="bg-blue-100 text-blue-800 px-1 rounded text-xs">LPG</span>}
-                    {station.diesel && <span className="bg-yellow-100 text-yellow-800 px-1 rounded text-xs">Diesel</span>}
-                    {station.petrol_95 && <span className="bg-green-100 text-green-800 px-1 rounded text-xs">95</span>}
-                    {station.petrol_98 && <span className="bg-green-100 text-green-800 px-1 rounded text-xs">98</span>}
-                    {station.cng && <span className="bg-purple-100 text-purple-800 px-1 rounded text-xs">CNG</span>}
-                    {station.car_wash && <span className="bg-sky-100 text-sky-800 px-1 rounded text-xs">Car wash</span>}
-                    {station.toilets && <span className="bg-gray-100 text-gray-700 px-1 rounded text-xs">Toilets</span>}
-                    {station.payment_cards && <span className="bg-orange-100 text-orange-800 px-1 rounded text-xs">Cards</span>}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+                    {station.lpg && <Tag color="#dbeafe" text="LPG" />}
+                    {station.diesel && <Tag color="#fef9c3" text="Diesel" />}
+                    {station.petrol_95 && <Tag color="#dcfce7" text="95" />}
+                    {station.petrol_98 && <Tag color="#dcfce7" text="98" />}
+                    {station.cng && <Tag color="#f3e8ff" text="CNG" />}
+                    {station.car_wash && <Tag color="#e0f2fe" text="Car wash" />}
+                    {station.toilets && <Tag color="#f3f4f6" text="Toilets" />}
+                    {station.payment_cards && <Tag color="#ffedd5" text="Cards" />}
                   </div>
                 </div>
               </Popup>
@@ -101,88 +135,97 @@ function MapPage({ stations, brands, loading }: { stations: Station[]; brands: {
   );
 }
 
+function Tag({ color, text }: { color: string; text: string }) {
+  return (
+    <span style={{ background: color, padding: '1px 5px', borderRadius: 3, fontSize: 11 }}>{text}</span>
+  );
+}
+
 function App() {
   const [stations, setStations] = useState<Station[]>([]);
   const [loading, setLoading] = useState(true);
-  const [brands, setBrands] = useState<{ [key: string]: string }>({});
+  const [brands, setBrands] = useState<Brands>({});
 
   useEffect(() => {
-    const loadStations = async () => {
-      try {
-        const response = await fetch('/cleanedData.json');
-        const data = await response.json();
+    fetch('/cleanedData.json')
+      .then(r => r.json())
+      .then((data) => {
         const stationData: Station[] = data.stations;
         setStations(stationData);
 
-        // Derive brand colours directly from the data so legend always matches map dots
-        const brandColorMap: { [key: string]: string } = {};
-        const brandCounts: { [key: string]: number } = {};
-        stationData.forEach(station => {
-          const b = station.brand;
-          if (!b) return;
-          brandCounts[b] = (brandCounts[b] || 0) + 1;
-          if (!brandColorMap[b] && station.color !== '#808080') {
-            brandColorMap[b] = station.color;
+        // Read colours directly from station data — legend always matches map dots
+        const colorMap: { [b: string]: string } = {};
+        const countMap: { [b: string]: number } = {};
+        stationData.forEach(s => {
+          if (!s.brand) return;
+          countMap[s.brand] = (countMap[s.brand] || 0) + 1;
+          if (!colorMap[s.brand] && s.color !== '#808080') {
+            colorMap[s.brand] = s.color;
           }
         });
 
-        // Only keep brands with >5 stations that have a distinct colour
-        const selectedBrands: { [key: string]: string } = {};
-        Object.entries(brandColorMap).forEach(([brand, color]) => {
-          if (brandCounts[brand] > 5) {
-            selectedBrands[brand] = color;
-          }
-        });
+        // Sort by count desc, keep only brands with >5 stations and a distinct colour
+        const sorted = Object.entries(colorMap)
+          .filter(([brand]) => countMap[brand] > 5)
+          .sort((a, b) => countMap[b[0]] - countMap[a[0]]);
 
-        setBrands(selectedBrands);
-      } catch (error) {
-        console.error('Error loading stations:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadStations();
+        setBrands(Object.fromEntries(sorted));
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
 
   return (
     <BrowserRouter>
-      <div className="h-screen flex flex-col overflow-hidden">
-        <header className="bg-gray-900 text-white px-6 py-3 flex items-center justify-between flex-shrink-0 shadow-md">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">⛽</span>
-            <h1 className="text-base font-semibold tracking-wide">Stacje Paliw &mdash; Poland</h1>
+      <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
+        {/* Header */}
+        <header style={{
+          flexShrink: 0,
+          background: '#111827',
+          color: 'white',
+          padding: '0 24px',
+          height: 48,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.4)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span>⛽</span>
+            <span style={{ fontWeight: 600, fontSize: 15, letterSpacing: '0.01em' }}>Stacje Paliw — Poland</span>
           </div>
-          <nav className="flex gap-1">
-            <NavLink
-              to="/"
-              end
-              className={({ isActive }) =>
-                `px-4 py-1.5 rounded text-sm font-medium transition-colors ${
-                  isActive ? 'bg-white text-gray-900' : 'text-gray-300 hover:bg-gray-700'
-                }`
-              }
-            >
-              Map
-            </NavLink>
-            <NavLink
-              to="/stats"
-              className={({ isActive }) =>
-                `px-4 py-1.5 rounded text-sm font-medium transition-colors ${
-                  isActive ? 'bg-white text-gray-900' : 'text-gray-300 hover:bg-gray-700'
-                }`
-              }
-            >
-              Stats
-            </NavLink>
+          <nav style={{ display: 'flex', gap: 4 }}>
+            {[['/', 'Map'], ['/stats', 'Stats']].map(([to, label]) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={to === '/'}
+                style={({ isActive }) => ({
+                  padding: '4px 14px',
+                  borderRadius: 6,
+                  fontSize: 13,
+                  fontWeight: 500,
+                  textDecoration: 'none',
+                  background: isActive ? 'white' : 'transparent',
+                  color: isActive ? '#111827' : '#d1d5db',
+                  transition: 'background 0.15s',
+                })}
+              >
+                {label}
+              </NavLink>
+            ))}
           </nav>
         </header>
-        <main className="flex-1 min-h-0">
+
+        {/* Page content — fills remaining height */}
+        <div style={{ flex: 1, minHeight: 0, display: 'flex', overflow: 'hidden' }}>
           <Routes>
             <Route path="/" element={<MapPage stations={stations} brands={brands} loading={loading} />} />
             <Route path="/stats" element={<StatsPage stations={stations} brands={brands} loading={loading} />} />
           </Routes>
-        </main>
+        </div>
+
       </div>
     </BrowserRouter>
   );
