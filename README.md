@@ -2,6 +2,8 @@
 
 A web application that displays gas stations across Poland, pulled from OpenStreetMap API, with an interactive map allowing zoom and pan.
 
+See working demo here: https://6b4382d5.stacje-paliw.pages.dev/
+
 ## Features
 
 - Interactive map of Poland
