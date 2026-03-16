@@ -114,35 +114,24 @@ function App() {
         const stationData: Station[] = data.stations;
         setStations(stationData);
 
+        // Derive brand colours directly from the data so legend always matches map dots
+        const brandColorMap: { [key: string]: string } = {};
         const brandCounts: { [key: string]: number } = {};
         stationData.forEach(station => {
-          const b = station.brand || 'Unknown';
+          const b = station.brand;
+          if (!b) return;
           brandCounts[b] = (brandCounts[b] || 0) + 1;
+          if (!brandColorMap[b] && station.color !== '#808080') {
+            brandColorMap[b] = station.color;
+          }
         });
 
-        const bigBrands = Object.entries(brandCounts)
-          .filter(([, count]) => count > 5)
-          .map(([brand]) => brand);
-
-        const brandColors: { [key: string]: string } = {
-          Orlen: '#ff0000',
-          Lotos: '#ffff00',
-          BP: '#00ff00',
-          Shell: '#ffd700',
-          Statoil: '#0000ff',
-          Moya: '#ffa500',
-          'Circle K': '#dc143c',
-          Amic: '#32cd32',
-          MOL: '#b22222',
-          Pieprzyk: '#000080',
-          Avia: '#4169e1',
-        };
-
-        const palette = ['#8B008B', '#00CED1', '#FF69B4', '#4B0082', '#2E8B57', '#DAA520'];
-
+        // Only keep brands with >5 stations that have a distinct colour
         const selectedBrands: { [key: string]: string } = {};
-        bigBrands.forEach((brand, index) => {
-          selectedBrands[brand] = brandColors[brand] || palette[index % palette.length];
+        Object.entries(brandColorMap).forEach(([brand, color]) => {
+          if (brandCounts[brand] > 5) {
+            selectedBrands[brand] = color;
+          }
         });
 
         setBrands(selectedBrands);
@@ -159,14 +148,19 @@ function App() {
   return (
     <BrowserRouter>
       <div className="h-screen flex flex-col overflow-hidden">
-        <header className="bg-white border-b px-4 py-2 flex items-center justify-between flex-shrink-0">
-          <h1 className="text-xl font-semibold">Stacje Paliw (Poland)</h1>
-          <nav className="space-x-4">
+        <header className="bg-gray-900 text-white px-6 py-3 flex items-center justify-between flex-shrink-0 shadow-md">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">⛽</span>
+            <h1 className="text-base font-semibold tracking-wide">Stacje Paliw &mdash; Poland</h1>
+          </div>
+          <nav className="flex gap-1">
             <NavLink
               to="/"
               end
               className={({ isActive }) =>
-                `px-3 py-1 rounded ${isActive ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`
+                `px-4 py-1.5 rounded text-sm font-medium transition-colors ${
+                  isActive ? 'bg-white text-gray-900' : 'text-gray-300 hover:bg-gray-700'
+                }`
               }
             >
               Map
@@ -174,7 +168,9 @@ function App() {
             <NavLink
               to="/stats"
               className={({ isActive }) =>
-                `px-3 py-1 rounded ${isActive ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`
+                `px-4 py-1.5 rounded text-sm font-medium transition-colors ${
+                  isActive ? 'bg-white text-gray-900' : 'text-gray-300 hover:bg-gray-700'
+                }`
               }
             >
               Stats
