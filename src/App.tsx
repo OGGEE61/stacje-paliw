@@ -87,7 +87,7 @@ function MapPage({ stations, brands, loading }: { stations: Station[]; brands: B
             Loading stations…
           </div>
         )}
-        <MapContainer center={[52.0, 19.5]} zoom={6} style={{ position: 'absolute', inset: 0 }}>
+        <MapContainer center={[52.0, 19.5]} zoom={6} style={{ height: '100%', width: '100%' }}>
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -212,7 +212,7 @@ function App() {
         </header>
 
         {/* Page content — fills remaining height */}
-        <div style={{ flex: 1, minHeight: 0, display: 'flex', overflow: 'hidden' }}>
+        <div style={{ flex: 1, minHeight: 0 }}>
           <Routes>
             <Route path="/" element={<MapPage stations={stations} brands={brands} loading={loading} />} />
             <Route path="/stats" element={<StatsPage stations={stations} brands={brands} loading={loading} />} />
