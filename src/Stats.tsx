@@ -197,8 +197,8 @@ export default function StatsPage({ stations, brands, loading }: StatsPageProps)
   return (
     <div className="h-full flex">
       {/* Sidebar */}
-      <aside className="w-64 min-w-[220px] p-4 bg-gray-100 border-r overflow-y-auto text-sm">
-        <h2 className="text-base font-bold mb-3">Summary</h2>
+      <aside className="w-72 min-w-[240px] p-4 bg-gray-100 border-r overflow-y-auto text-sm">
+        <h2 className="text-lg font-bold mb-3">Summary</h2>
         <div className="space-y-1 mb-4">
           <div><strong>{summary.total}</strong> stations total</div>
           <div><strong>{summary.is24_7}</strong> open 24/7 ({Math.round(summary.is24_7 / summary.total * 100)}%)</div>
@@ -209,16 +209,22 @@ export default function StatsPage({ stations, brands, loading }: StatsPageProps)
           <div><strong>{summary.cardPayment}</strong> accept cards</div>
         </div>
 
-        <h2 className="text-base font-bold mb-2">Brand colors</h2>
-        <div className="space-y-1">
-          {Object.entries(brands).map(([brand, color]) => (
-            <div key={brand} className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: color }} />
-              {brand}
-            </div>
-          ))}
+        <h2 className="text-lg font-bold mb-2">Legend</h2>
+        <div className="mb-3">
+          <h3 className="font-semibold mb-1">Major Brands</h3>
+          <ul className="space-y-1">
+            {Object.entries(brands).map(([brand, color]) => (
+              <li key={brand} className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
+                {brand}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h3 className="font-semibold mb-1">Independent / small chains</h3>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-sm flex-shrink-0 bg-gray-400" />
+            <div className="w-4 h-4 rounded-full flex-shrink-0 bg-gray-400" />
             Other
           </div>
         </div>

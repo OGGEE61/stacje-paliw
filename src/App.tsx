@@ -29,9 +29,9 @@ interface Station {
 function MapPage({ stations, brands, loading }: { stations: Station[]; brands: { [key: string]: string }; loading: boolean }) {
   return (
     <div className="h-full flex">
-      <aside className="w-72 min-w-[240px] p-4 bg-gray-100 border-r overflow-y-auto">
-        <h2 className="text-lg font-bold mb-4">Legend</h2>
-        <div className="mb-4">
+      <aside className="w-72 min-w-[240px] p-4 bg-gray-100 border-r overflow-y-auto text-sm">
+        <h2 className="text-lg font-bold mb-3">Legend</h2>
+        <div className="mb-3">
           <h3 className="font-semibold mb-1">Major Brands</h3>
           <ul className="space-y-1">
             {Object.keys(brands).map(brand => (

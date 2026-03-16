@@ -1,45 +1,62 @@
-# Gas Stations in Poland Map
+# Stacje Paliw — Poland Gas Station Map
 
-A web application that displays gas stations across Poland, pulled from OpenStreetMap API, with an interactive map allowing zoom and pan.
+Interactive map of gas stations across Poland, built on OpenStreetMap data.
 
-See working demo here: stacje-paliw.pages.dev
+**Live demo:** [stacje-paliw.pages.dev](https://stacje-paliw.pages.dev)
 
-## Features
+## Views
 
-- Interactive map of Poland
-- Gas stations marked by brand with different colors
-- Data fetched from OpenStreetMap Overpass API
-- Built with React, TypeScript, Vite, and Tailwind CSS
+### Map
+All ~3,600 named stations plotted as colour-coded dots by brand. Click any dot to see the station name, opening hours, fuel types (LPG, diesel, 95, 98, CNG), and amenities (car wash, toilets, card payment).
 
-## Getting Started
+### Stats
+One pie chart per voivodeship showing brand market share. Voivodeship borders are drawn on the map. Click a chart to see the full breakdown with percentages. The sidebar shows national aggregates (24/7 count, LPG coverage, etc.).
 
-1. Install dependencies: `npm install`
-2. Run development server: `npm run dev`
-3. Build for production: `npm run build`
+## Data Pipeline
 
-## Hosting
+Data is static and refreshed manually by running these scripts in order:
 
-The app can be hosted on any static site host like Netlify, Vercel, or GitHub Pages. For a simple server, use `npm install -g serve` then `serve dist` after building.
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# 1. Pull raw station data from OpenStreetMap Overpass API
+node fetchData.js              # → public/data.json
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# 2. Clean, normalise brand names, classify by voivodeship
+node cleanData.js              # → public/cleanedData.json
+
+# 3. Fetch voivodeship boundaries (run once, or to refresh)
+node fetchVoivodeships.js      # → public/voivodeships.geojson
 ```
+
+### What cleanData.js does
+- Uses the OSM `name` tag as the brand identifier; drops stations with no name
+- Normalises brand variants: `MOYA`, `Moya Express` → `Moya`; `Bliska` → `Orlen`; `Circle K Express` → `Circle K`; `Amic Energy` → `Amic`; etc.
+- Groups generic names (`Stacja Paliw`, `LPG`, `Auto-Gaz`, …) as `Independent`
+- Assigns brand colours; brands with ≤5 stations get grey
+- Extracts fuel types: LPG, diesel, 95, 98, CNG
+- Extracts amenities: car wash, toilets, compressed air, card payment
+
+### Data quality
+Source is OpenStreetMap, which covers roughly 55% of real-world stations in Poland (~3,600 of ~8,000). Stations missing the `name` tag in OSM are excluded.
+
+## Tech Stack
+
+| Layer | Library |
+|---|---|
+| UI | React 19, TypeScript |
+| Build | Vite |
+| Styling | Tailwind CSS |
+| Maps | Leaflet, react-leaflet |
+| Data | OpenStreetMap Overpass API |
+
+## Development
+
+```bash
+npm install
+npm run dev      # dev server at localhost:5173
+npm run build    # production build → dist/
+npm run preview  # preview production build
+```
+
+## Deployment
+
+Any static host works. After `npm run build`, deploy the `dist/` folder.
