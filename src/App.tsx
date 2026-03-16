@@ -43,7 +43,7 @@ function MapPage({ stations, brands, loading }: { stations: Station[]; brands: {
           </ul>
         </div>
         <div>
-          <h3 className="font-semibold mb-1">Small chains / unknown</h3>
+          <h3 className="font-semibold mb-1">Independent / small chains</h3>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded-full flex-shrink-0 bg-gray-400" />
             &le;5 stations

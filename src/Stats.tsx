@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from 'react-leaflet';
 import { DivIcon, type LatLngExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -147,7 +147,22 @@ function PieChartMarker({
   );
 }
 
+const voivodeshipStyle = {
+  color: '#555',
+  weight: 1.5,
+  fillOpacity: 0,
+};
+
 export default function StatsPage({ stations, brands, loading }: StatsPageProps) {
+  const [voivodeshipGeoJSON, setVoivodeshipGeoJSON] = useState<object | null>(null);
+
+  useEffect(() => {
+    fetch('/voivodeships.geojson')
+      .then(r => r.json())
+      .then(setVoivodeshipGeoJSON)
+      .catch(console.error);
+  }, []);
+
   const voivodeships = useMemo(
     () => Array.from(new Set(stations.map((s) => s.voivodeship))).sort(),
     [stations]
@@ -225,6 +240,13 @@ export default function StatsPage({ stations, brands, loading }: StatsPageProps)
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
+          {voivodeshipGeoJSON && (
+            <GeoJSON
+              key="voivodeships"
+              data={voivodeshipGeoJSON as GeoJSON.GeoJsonObject}
+              style={voivodeshipStyle}
+            />
+          )}
           {voivodeships.map((voiv) => (
             <PieChartMarker
               key={voiv}
