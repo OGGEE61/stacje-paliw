@@ -178,7 +178,6 @@ const cleaned = withName.map(el => {
     lat: el.lat,
     lon: el.lon,
     brand,
-    operator: tags.operator || null,
     color: getColor(brand),
     voivodeship: getVoivodeship(el.lat, el.lon),
     opening_hours: tags.opening_hours || null,

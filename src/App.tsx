@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import './App.css';
 import StatsPage from './Stats';
 
 export interface Station {
@@ -10,7 +9,6 @@ export interface Station {
   lat: number;
   lon: number;
   brand?: string;
-  operator?: string | null;
   color: string;
   voivodeship: string;
   opening_hours?: string | null;
@@ -27,17 +25,10 @@ export interface Station {
 
 export type Brands = { [brand: string]: string };
 
-// Shared legend — used identically on both pages
+// Shared legend content — wrap in a sidebar <aside> at the call site
 export function BrandLegend({ brands, note }: { brands: Brands; note?: string }) {
   return (
-    <aside style={{
-      width: 190,
-      flexShrink: 0,
-      overflowY: 'auto',
-      background: '#f3f4f6',
-      borderRight: '1px solid #d1d5db',
-      padding: '14px 12px',
-    }}>
+    <>
       <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#6b7280', marginBottom: 10 }}>
         Legend
       </p>
@@ -79,14 +70,16 @@ export function BrandLegend({ brands, note }: { brands: Brands; note?: string })
       </div>
 
       {note && <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 12 }}>{note}</p>}
-    </aside>
+    </>
   );
 }
 
 function MapPage({ stations, brands, loading }: { stations: Station[]; brands: Brands; loading: boolean }) {
   return (
     <div style={{ height: '100%', display: 'flex' }}>
-      <BrandLegend brands={brands} note="Click a dot to see details." />
+      <aside style={{ width: 190, flexShrink: 0, overflowY: 'auto', background: '#f3f4f6', borderRight: '1px solid #d1d5db', padding: '14px 12px' }}>
+        <BrandLegend brands={brands} note="Click a dot to see details." />
+      </aside>
 
       <div style={{ flex: 1, position: 'relative' }}>
         {loading && (
@@ -94,7 +87,7 @@ function MapPage({ stations, brands, loading }: { stations: Station[]; brands: B
             Loading stations…
           </div>
         )}
-        <MapContainer center={[52.0, 19.5]} zoom={6} style={{ height: '100%', width: '100%' }}>
+        <MapContainer center={[52.0, 19.5]} zoom={6} style={{ position: 'absolute', inset: 0 }}>
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

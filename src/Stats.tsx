@@ -194,7 +194,7 @@ export default function StatsPage({ stations, brands, loading }: StatsPageProps)
             Loading stations…
           </div>
         )}
-        <MapContainer center={[52.0, 19.5]} zoom={6} style={{ height: '100%', width: '100%' }}>
+        <MapContainer center={[52.0, 19.5]} zoom={6} style={{ position: 'absolute', inset: 0 }}>
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
